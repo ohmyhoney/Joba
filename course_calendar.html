@@ -1,0 +1,102 @@
+﻿<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn"t work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body bgcolor="#A9D0F5"> 
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h1>請輸入以下內容 </h1>
+                        <p>課程名稱: </p>
+						<input type="text" class="form-control" id="course_name">
+						<p>授課教師: </p>
+						<input type="text" class="form-control" id="course_lecturer"/>
+						<p>開始日期&時間: </p>
+						<div class="input-group date" id="course_start">
+							<input type="text" class="form-control" />
+							<span class="input-group-addon">
+							<span class="glyphicon glyphicon-calendar"></span>
+							</span>
+						</div>
+						<p>結束日期&時間: </p>
+						<div class="input-group date" id="course_end">
+							<input type="text" class="form-control" />
+							<span class="input-group-addon">
+							<span class="glyphicon glyphicon-calendar"></span>
+							</span>
+						</div>
+						<p></p>
+                        <a href="#menu-toggle" class="btn btn-default" onclick="ExportExcel()">GO!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+
+	<div id="TableDIV" style=display:none>
+	
+	</div>
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+	<script src="js/bootstrap-datetimepicker.min.js"></script>
+    <!-- Menu Toggle Script -->
+    <script type="text/javascript">
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+
+
+	$(function(){
+		$("#course_start").datetimepicker({
+		autoclose:true,
+		todayBtn:true,
+		todayHighlight:true,
+		inputMask: true,
+		pickerPosition: "bottom-left",
+		pickTime:false,
+		});
+
+		$("#course_end").datetimepicker({
+		autoclose:true,
+		todayBtn:true,
+		todayHighlight:true,
+		inputMask: true,
+		pickerPosition: "bottom-left",
+		pickTime:false,
+		});
+	});
+
+	function ExportExcel(){
+	createCalendar("TableDIV");
+    document.all.TableHtmlTXT.value = document.all.TableDIV.innerHTML;
+    form1.submit();
+}
+
+
+    </script>
+
+</body> 
+</html>
