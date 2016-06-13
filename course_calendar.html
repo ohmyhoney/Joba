@@ -1,7 +1,7 @@
 ﻿<html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	
+
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 	<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
@@ -17,7 +17,7 @@
     <![endif]-->
 
 </head>
-<body bgcolor="#A9D0F5"> 
+<body bgcolor="#A9D0F5">
 
         <!-- Page Content -->
         <div id="page-content-wrapper">
@@ -27,24 +27,32 @@
                         <h1>請輸入以下內容 </h1>
                         <p>課程名稱: </p>
 						<input type="text" class="form-control" id="course_name">
-						<p>授課教師: </p>
-						<input type="text" class="form-control" id="course_lecturer"/>
 						<p>開始日期&時間: </p>
 						<div class="input-group date" id="course_start">
-							<input type="text" class="form-control" />
+							<input type="text" class="form-control" id="course_start_date" value="Select date ..."/>
 							<span class="input-group-addon">
 							<span class="glyphicon glyphicon-calendar"></span>
 							</span>
 						</div>
-						<p>結束日期&時間: </p>
-						<div class="input-group date" id="course_end">
-							<input type="text" class="form-control" />
-							<span class="input-group-addon">
-							<span class="glyphicon glyphicon-calendar"></span>
-							</span>
-						</div>
+
 						<p></p>
-                        <a href="#menu-toggle" class="btn btn-default" onclick="ExportExcel()">GO!</a>
+						<p>課堂數： </p>
+						<input type="radio" id="class_num1" name="class_num" value="12" checked>  12
+						<input type="radio" id="class_num2" name="class_num" value="24">  24
+
+						<p></p>
+						<p>上課日： </p>
+						<input type="checkbox" name="week_day" id="Sun" value="0"> 星期日
+						<input type="checkbox" name="week_day" id="Mon" value="1"> 星期一
+						<input type="checkbox" name="week_day" id="Tue" value="2"> 星期二
+						<input type="checkbox" name="week_day" id="Wed" value="3"> 星期三
+						<input type="checkbox" name="week_day" id="Thr" value="4"> 星期四
+						<input type="checkbox" name="week_day" id="Fri" value="5"> 星期五
+						<input type="checkbox" name="week_day" id="Sat" value="6"> 星期六
+
+						<p></p>
+                        <a href="#menu-toggle" class="btn btn-default" id="go_btn" onclick="ExportExcel()">GO!</a>
+                        <a href="#menu-toggle" class="btn btn-default" id="cal_date">Calculate!</a>
                     </div>
                 </div>
             </div>
@@ -53,7 +61,7 @@
 
 
 	<div id="TableDIV" style=display:none>
-	
+
 	</div>
     <!-- jQuery -->
     <script src="js/jquery.js"></script>
@@ -71,32 +79,131 @@
 
 	$(function(){
 		$("#course_start").datetimepicker({
+		startDate:'+1d',
+		format:'yyyy-mm-dd',
 		autoclose:true,
 		todayBtn:true,
 		todayHighlight:true,
 		inputMask: true,
 		pickerPosition: "bottom-left",
-		pickTime:false,
-		});
-
-		$("#course_end").datetimepicker({
-		autoclose:true,
-		todayBtn:true,
-		todayHighlight:true,
-		inputMask: true,
-		pickerPosition: "bottom-left",
-		pickTime:false,
+		minView:2,
 		});
 	});
 
-	function ExportExcel(){
-	createCalendar("TableDIV");
-    document.all.TableHtmlTXT.value = document.all.TableDIV.innerHTML;
-    form1.submit();
-}
+	$(document).ready(function() {
+        $("#cal_date").click(function(){
+            var in_start_date;
+            var in_class_num;
+            var in_week_day = [];
 
+            in_start_date = course_start_date.value;
+            in_class_num = $("input[name='class_num']:checked").val();
+
+            $.each($("input[name='week_day']:checked"), function(){
+                in_week_day.push($(this).val());
+            });
+
+            OutputDate( in_start_date, in_class_num, in_week_day );
+        });
+    });
+
+	function getToday(){
+		var today = new Date();
+		return today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
+	}
+
+	function getCheckedValue( checkBoxName ){
+		return $('input:checkbox[name=' + checkBoxName + '][checked=true]').map( function() {
+			return $(this).val();
+		})
+		.get().join(',');
+	}
+
+	Date.prototype.getWeek = function() {
+        var onejan = new Date(this.getFullYear(), 0, 1);
+        return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    }
+
+    function getDateOfWeekAndDay(w, y, z) {
+        var in_day = parseInt( z );
+        var onejan = new Date( y, 0, 1);
+        var d = (1 + (w - 1) * 7) - onejan.getDay() + in_day; // calculate the date with the day and week number
+        var temp = new Date(y, 0 , d);
+
+        //document.write("Get Date: " + temp.getFullYear()  + " " + ( temp.getMonth() + 1 ) + " " + temp.getDate() + "</br>");
+
+        return new Date(y, 0, d);
+	}
+
+	function OutputDate( in_start_date, in_class_num, in_week_day ){
+		// Input data
+		var skipped_date = [];
+		var out_cal = [];
+		var idx = 0;
+		var sdate = new Date(in_start_date);
+		var sdate_week_num = sdate.getWeek();
+		var sdate_week_day = sdate.getDay();
+		var temp_date;
+		var temp_skipped;
+		var desired_day_idx = 0;
+		var skipped = false;
+		var crnt_cnt = 0;
+
+		document.write("start date: " + in_start_date + "</br>");
+		document.write("year: " + sdate.getDate() + " " + sdate.getFullYear() + " " + ( sdate.getMonth() + 1 ) + " " + sdate_week_day + " " + sdate_week_num + "</br>");
+		document.write("class num: " + in_class_num + "</br>");
+		document.write("week day: " + in_week_day.join(", ") + "</br>");
+
+		//getDateOfWeekAndDay( 1, 2016, "4" );
+		// To-Do: Get the skipped date with the corresponding year.
+		// Setup temp skipped date
+		skipped_date.push( new Date("2016/06/30") );
+		skipped_date.push( new Date("2016/07/05") );
+
+		for( idx = 0; idx < in_week_day.length; idx++ ) {
+			if( sdate_week_day <= parseInt( in_week_day[idx] ) ) {
+				break;
+			}
+		}
+
+		if( idx == in_week_day.length ) {
+			sdate_week_num++;
+		}
+
+		for( var i = 0, crnt_cnt = 0; crnt_cnt < parseInt(in_class_num); i++ ){
+			desired_day_idx = ( i + idx ) % in_week_day.length;
+			temp_date = getDateOfWeekAndDay( sdate_week_num, sdate.getFullYear(), in_week_day[desired_day_idx] );
+
+			skipped = false;
+
+			for( j = 0; j < skipped_date.length; j++ ) {
+				temp_skipped = new Date( skipped_date[j] );
+
+				if( temp_skipped.getTime() == temp_date.getTime() ) {
+					skipped = true;
+					break;
+				}
+			}
+
+			if( false == skipped ) {
+				document.write("Date " + crnt_cnt + ": " + temp_date.toString() + "</br>" );
+				out_cal.push( temp_date );
+				crnt_cnt++;
+			}
+
+			if( desired_day_idx == in_week_day.length - 1 ) {
+				sdate_week_num++;
+			}
+		}
+	}
+
+	function ExportExcel(){
+        createCalendar("TableDIV");
+        document.all.TableHtmlTXT.value = document.all.TableDIV.innerHTML;
+        form1.submit();
+	}
 
     </script>
 
-</body> 
+</body>
 </html>
