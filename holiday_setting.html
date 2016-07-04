@@ -1,0 +1,169 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn"t work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h1>請輸入國定假日 </h1>
+                        <p>日期: </p>
+						<div class="input-group date" id="course_start">
+							<input type="text" class="form-control" id="course_start_date" value="Select date ..."/>
+							<span class="input-group-addon">
+							<span class="glyphicon glyphicon-calendar"></span>
+							</span>
+						</div>
+						<!-- <input type="text" class="form-control" id="holiday"> -->
+
+						<p></p>
+						<a href="#menu-toggle" class="btn btn-default" id="push_holiday">確定!</a>
+						<p></p><br>
+                        <p>已輸入的國定假日: </p>
+						<textarea Cols="20" Rows="10" class="form-control" id="output_holiday"></textarea>
+						<p></p><br>
+                        <a href="right.html" class="btn btn-default">儲存!</a>
+						<a href="#menu-toggle" class="btn btn-default" id="clear_holiday">清除所有設定!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+
+	<div id="TableDIV" style=display:none>
+
+	</div>
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+	<script src="js/bootstrap-datetimepicker.min.js"></script>
+    <!-- Menu Toggle Script -->
+    <script type="text/javascript">
+	
+	var holidays = [];
+	
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+
+	$(function(){
+		$("#course_start").datetimepicker({
+		startDate:'+1d',
+		format:'yyyy-mm-dd',
+		autoclose:true,
+		todayBtn:true,
+		todayHighlight:true,
+		inputMask: true,
+		pickerPosition: "bottom-left",
+		minView:2,
+		});
+	});
+
+	$(document).ready(function() {
+        $("#push_holiday").click(function(){
+            var in_start_date;
+			var idx = 0;
+			var output_holiday_string;
+
+            in_start_date = document.getElementById('course_start_date').value;
+			if(is_valid_date(in_start_date))
+			{
+				if(!is_date_exist(in_start_date))
+				{
+					holidays.push(in_start_date);
+					for( idx = 0; idx < holidays.length; idx++ ) {
+						output_holiday_string = holidays[idx] + "\n";
+					}
+					document.getElementById('output_holiday').value += output_holiday_string;
+				}
+				else
+				{
+					alert("此日期已輸入過了!");
+				}
+			}
+			else
+			{
+				alert("請輸入正確的日期再確定!");
+			}
+        });
+    });
+
+	$(document).ready(function() {
+        $("#clear_holiday").click(function(){
+            while(holidays.length > 0) 
+			{
+				holidays.pop();
+			}
+			document.getElementById('output_holiday').value = "";
+        });
+    });
+
+	function is_valid_date( in_start_date ){
+		var res = 0;
+		var sdate = new Date(in_start_date);
+		var sdate_year = sdate.getFullYear();
+		var sdate_month = sdate.getMonth();
+		var sdate_day = sdate.getDate();
+		if(sdate_year === parseInt(sdate_year, 10) &&
+			sdate_month === parseInt(sdate_month, 10) &&
+			sdate_day === parseInt(sdate_day, 10))
+		{
+			res = 1;
+		}
+		return res;
+	}
+
+	function is_date_exist( in_start_date ){
+		var res = 0;
+		var idx = 0;
+		var sdate = new Date(in_start_date);
+		var sdate_year = sdate.getFullYear();
+		var sdate_month = sdate.getMonth();
+		var sdate_day = sdate.getDate();
+		var hdate;
+		var hdate_year;
+		var hdate_month;
+		var hdate_day;
+		
+		for(idx = 0; idx < holidays.length; idx++)
+		{
+			hdate = new Date(holidays[idx]);
+			hdate_year = hdate.getFullYear();
+			hdate_month = hdate.getMonth();
+			hdate_day = hdate.getDate();
+			if(sdate_year == hdate_year &&
+				sdate_month == hdate_month &&
+				sdate_day == hdate_day)
+			{
+				res = 1;
+			}
+		}
+		return res;
+	}
+
+    </script>
+
+</body>
+</html>
